@@ -1,4 +1,6 @@
+import { existsSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { Router } from "express";
 import multer from "multer";
 import sharp, { type OutputInfo } from "sharp";
@@ -6,8 +8,21 @@ import { prisma } from "../../lib/prisma.js";
 import { authenticate, currentUser } from "../../middlewares/auth.js";
 import { ApiError } from "../../utils/http.js";
 
-/** Bundled seed images (and any legacy files) are served from here. */
-export const UPLOAD_ROOT = path.resolve(process.cwd(), "uploads");
+/**
+ * Bundled seed images (and any legacy files) are served from here.
+ * Found relative to this file, not process.cwd(): on Vercel the function's
+ * working directory is the repo root while the code lives in backend/.
+ * Works from src/ (tsx) and dist/src/ (compiled) alike.
+ */
+function findUploadRoot() {
+  let dir = path.dirname(fileURLToPath(import.meta.url));
+  for (let i = 0; i < 6; i++) {
+    if (existsSync(path.join(dir, "uploads", "seed"))) return path.join(dir, "uploads");
+    dir = path.dirname(dir);
+  }
+  return path.resolve(process.cwd(), "uploads");
+}
+export const UPLOAD_ROOT = findUploadRoot();
 
 const upload = multer({
   storage: multer.memoryStorage(),
