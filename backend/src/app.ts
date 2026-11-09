@@ -36,6 +36,29 @@ export function createApp() {
   app.use("/uploads/db", uploadFileRouter);
   app.use("/uploads", express.static(UPLOAD_ROOT, { maxAge: "30d", immutable: true, fallthrough: false }));
 
+  // Friendly landing response for anyone opening the API URL in a browser.
+  const apiInfo: express.RequestHandler = (_req, res) => {
+    res.json({
+      name: "Dream Craft Events API",
+      status: "online",
+      message: "Welcome! This is the backend API for Dream Craft Events. Visit the website to explore events.",
+      website: env.CLIENT_URL,
+      health: "/api/health",
+      endpoints: [
+        "/api/events",
+        "/api/products",
+        "/api/reviews",
+        "/api/auth",
+        "/api/bookings",
+        "/api/orders",
+        "/api/custom-events",
+        "/api/chat",
+      ],
+    });
+  };
+  app.get("/", apiInfo);
+  app.get("/api", apiInfo);
+
   app.get("/api/health", async (_req, res) => {
     await prisma.$queryRaw`SELECT 1`;
     res.json({ status: "ok", time: new Date().toISOString() });
