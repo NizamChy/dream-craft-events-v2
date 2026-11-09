@@ -288,3 +288,16 @@ model NewsletterSubscriber {
   email     String   @unique
   createdAt DateTime @default(now())
 }
+
+/// Uploaded images (optimized WebP). Kept in the database so they survive
+/// on hosts with an ephemeral filesystem (Vercel, Render free tier).
+model Upload {
+  id        String   @id @default(cuid())
+  data      Bytes
+  mimeType  String   @default("image/webp")
+  width     Int
+  height    Int
+  size      Int
+  userId    String?
+  createdAt DateTime @default(now())
+}

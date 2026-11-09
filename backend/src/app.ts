@@ -17,7 +17,7 @@ import eventRoutes from "./modules/events/events.routes.js";
 import orderRoutes from "./modules/orders/orders.routes.js";
 import organizerRequestRoutes from "./modules/organizer-requests/organizer-requests.routes.js";
 import productRoutes from "./modules/products/products.routes.js";
-import uploadRoutes, { UPLOAD_ROOT } from "./modules/uploads/uploads.routes.js";
+import uploadRoutes, { UPLOAD_ROOT, uploadFileRouter } from "./modules/uploads/uploads.routes.js";
 import userRoutes from "./modules/users/users.routes.js";
 
 export function createApp() {
@@ -32,7 +32,8 @@ export function createApp() {
   app.use(cookieParser());
   if (env.NODE_ENV !== "test") app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev"));
 
-  // Optimized images (immutable file names → long cache).
+  // Uploaded images live in the database; bundled seed images on disk.
+  app.use("/uploads/db", uploadFileRouter);
   app.use("/uploads", express.static(UPLOAD_ROOT, { maxAge: "30d", immutable: true, fallthrough: false }));
 
   app.get("/api/health", async (_req, res) => {

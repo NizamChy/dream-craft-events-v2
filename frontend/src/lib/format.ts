@@ -14,21 +14,25 @@ export function formatMoneyShort(poisha: number) {
   return `৳${Math.round(t)}`;
 }
 
+// Every date is shown in Bangladesh time, so server-rendered HTML (UTC on the
+// host) and the browser always agree, wherever the visitor is.
+export const TIME_ZONE = "Asia/Dhaka";
+
 export const formatDate = (iso: string | Date, opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", year: "numeric" }) =>
-  new Date(iso).toLocaleDateString("en-US", opts);
+  new Date(iso).toLocaleDateString("en-US", { timeZone: TIME_ZONE, ...opts });
 
 export const formatDateTime = (iso: string | Date) =>
-  new Date(iso).toLocaleString("en-US", { day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" });
+  new Date(iso).toLocaleString("en-US", { timeZone: TIME_ZONE, day: "numeric", month: "short", year: "numeric", hour: "numeric", minute: "2-digit" });
 
-export const formatTime = (iso: string | Date) => new Date(iso).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+export const formatTime = (iso: string | Date) => new Date(iso).toLocaleTimeString("en-US", { timeZone: TIME_ZONE, hour: "numeric", minute: "2-digit" });
 
 export function dateParts(iso: string) {
   const d = new Date(iso);
   return {
-    day: d.toLocaleDateString("en-US", { day: "2-digit" }),
-    month: d.toLocaleDateString("en-US", { month: "short" }),
-    weekday: d.toLocaleDateString("en-US", { weekday: "short" }),
-    year: d.getFullYear(),
+    day: d.toLocaleDateString("en-US", { timeZone: TIME_ZONE, day: "2-digit" }),
+    month: d.toLocaleDateString("en-US", { timeZone: TIME_ZONE, month: "short" }),
+    weekday: d.toLocaleDateString("en-US", { timeZone: TIME_ZONE, weekday: "short" }),
+    year: Number(d.toLocaleDateString("en-US", { timeZone: TIME_ZONE, year: "numeric" })),
   };
 }
 

@@ -6,3 +6,6 @@ uploads/*
 !uploads/seed
 coverage
 *.log
+
+.vercel
+.env*

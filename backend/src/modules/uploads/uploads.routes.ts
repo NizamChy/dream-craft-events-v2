@@ -1,12 +1,12 @@
-import { randomUUID } from "node:crypto";
-import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { Router } from "express";
 import multer from "multer";
-import sharp from "sharp";
-import { authenticate } from "../../middlewares/auth.js";
+import sharp, { type OutputInfo } from "sharp";
+import { prisma } from "../../lib/prisma.js";
+import { authenticate, currentUser } from "../../middlewares/auth.js";
 import { ApiError } from "../../utils/http.js";
 
+/** Bundled seed images (and any legacy files) are served from here. */
 export const UPLOAD_ROOT = path.resolve(process.cwd(), "uploads");
 
 const upload = multer({
@@ -22,28 +22,41 @@ const router = Router();
 
 /**
  * Accepts an image, auto-rotates it, resizes to max 1600px wide and stores an
- * optimized WebP. Returns a URL path that the frontend serves via its proxy.
+ * optimized WebP in the database (serverless hosts have no persistent disk).
+ * Returns a URL path that the frontend serves via its proxy.
  */
 router.post("/", authenticate, upload.single("image"), async (req, res) => {
   if (!req.file) throw ApiError.badRequest("Please attach an image in the 'image' field");
 
-  const now = new Date();
-  const folder = path.join(UPLOAD_ROOT, String(now.getFullYear()), String(now.getMonth() + 1).padStart(2, "0"));
-  await mkdir(folder, { recursive: true });
-  const fileName = `${randomUUID()}.webp`;
-
+  let output: { data: Buffer; info: OutputInfo };
   try {
-    const info = await sharp(req.file.buffer)
+    output = await sharp(req.file.buffer)
       .rotate()
       .resize({ width: 1600, withoutEnlargement: true })
       .webp({ quality: 75 })
-      .toFile(path.join(folder, fileName));
-
-    const relative = path.relative(UPLOAD_ROOT, path.join(folder, fileName)).split(path.sep).join("/");
-    res.status(201).json({ url: `/uploads/${relative}`, width: info.width, height: info.height, size: info.size });
+      .toBuffer({ resolveWithObject: true });
   } catch {
     throw ApiError.badRequest("The file could not be processed as an image");
   }
+
+  const { data, info } = output;
+  const saved = await prisma.upload.create({
+    data: { data: new Uint8Array(data), width: info.width, height: info.height, size: info.size, userId: currentUser(req).id },
+    select: { id: true },
+  });
+  res.status(201).json({ url: `/uploads/db/${saved.id}.webp`, width: info.width, height: info.height, size: info.size });
 });
 
 export default router;
+
+/** GET /uploads/db/:id.webp — file names are unique, so cache forever. */
+export const uploadFileRouter = Router();
+
+uploadFileRouter.get("/:file", async (req, res) => {
+  const id = /^([a-z0-9]{20,40})\.webp$/.exec(req.params.file)?.[1];
+  const file = id ? await prisma.upload.findUnique({ where: { id }, select: { data: true, mimeType: true } }) : null;
+  if (!file) throw ApiError.notFound("Image not found");
+  res.setHeader("Content-Type", file.mimeType);
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  res.send(Buffer.from(file.data));
+});
