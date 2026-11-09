@@ -1,0 +1,285 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-heading: var(--font-display);
+  --font-display: var(--font-display);
+  --color-marigold: var(--marigold);
+  --color-marigold-foreground: var(--marigold-foreground);
+  --color-success: var(--success);
+  --color-ink: var(--ink);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  --background: #f7f7fb;
+  --foreground: #1e1b3a;
+  --card: #ffffff;
+  --card-foreground: #1e1b3a;
+  --popover: #ffffff;
+  --popover-foreground: #1e1b3a;
+  --primary: #d0145f;
+  --primary-foreground: #ffffff;
+  --secondary: #efedf7;
+  --secondary-foreground: #1e1b3a;
+  --muted: #efedf7;
+  --muted-foreground: #5f5c7e;
+  --accent: #fde8f1;
+  --accent-foreground: #9d0e47;
+  --destructive: #d92d20;
+  --border: #e3e1ee;
+  --input: #d9d6e7;
+  --ring: #d0145f;
+  --marigold: #f5a524;
+  --marigold-foreground: #3d2600;
+  --success: #0f8a7c;
+  --ink: #1e1b3a;
+  --chart-1: #d0145f;
+  --chart-2: #f5a524;
+  --chart-3: #12a594;
+  --chart-4: #6e56cf;
+  --chart-5: #3e63dd;
+  --radius: 0.75rem;
+  --sidebar: #1e1b3a;
+  --sidebar-foreground: #e9e7f5;
+  --sidebar-primary: #f0498f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #2c2850;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #2f2b52;
+  --sidebar-ring: #f0498f;
+}
+
+.dark {
+  --background: #13112a;
+  --foreground: #f1f0f8;
+  --card: #1c1936;
+  --card-foreground: #f1f0f8;
+  --popover: #1c1936;
+  --popover-foreground: #f1f0f8;
+  --primary: #f0498f;
+  --primary-foreground: #1a0510;
+  --secondary: #262343;
+  --secondary-foreground: #f1f0f8;
+  --muted: #262343;
+  --muted-foreground: #a9a6c7;
+  --accent: #3a1430;
+  --accent-foreground: #ffb3d2;
+  --destructive: #f97066;
+  --border: rgb(255 255 255 / 10%);
+  --input: rgb(255 255 255 / 15%);
+  --ring: #f0498f;
+  --marigold: #f7b955;
+  --marigold-foreground: #2b1b00;
+  --success: #3cc9b4;
+  --ink: #0d0b1f;
+  --chart-1: #f0498f;
+  --chart-2: #f7b955;
+  --chart-3: #3cc9b4;
+  --chart-4: #9e8cfc;
+  --chart-5: #7b9bff;
+  --sidebar: #0d0b1f;
+  --sidebar-foreground: #e9e7f5;
+  --sidebar-primary: #f0498f;
+  --sidebar-primary-foreground: #1a0510;
+  --sidebar-accent: #221f3e;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #24213f;
+  --sidebar-ring: #f0498f;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer base {
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 25%, transparent);
+  }
+}
+
+/* Ticket stub: two half-circle notches cut out at --notch-y (the perforation line). */
+@utility ticket {
+  --notch: 11px;
+  --notch-y: 50%;
+  mask:
+    radial-gradient(circle var(--notch) at 0 var(--notch-y), #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch) at 100% var(--notch-y), #0000 98%, #000) right / 51% 100% no-repeat;
+}
+
+@utility perforation {
+  background-image: linear-gradient(to right, var(--border) 50%, transparent 0);
+  background-size: 10px 1.5px;
+  background-repeat: repeat-x;
+  height: 1.5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Scrollbars ----------
+ * Chromium/Safari get a slim pill thumb via ::-webkit-scrollbar.
+ * Firefox (no ::-webkit-scrollbar) gets the standard thin scrollbar.
+ * Standard props are scoped to Firefox only, because in Chromium they
+ * would override the ::-webkit-scrollbar styling.
+ */
+:root {
+  --scrollbar-thumb: color-mix(in oklab, var(--foreground) 20%, transparent);
+  --scrollbar-thumb-hover: color-mix(in oklab, var(--foreground) 36%, transparent);
+  --scrollbar-thumb-active: var(--primary);
+}
+
+@layer base {
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    min-height: 48px;
+    border: 3px solid transparent;
+    border-radius: 9999px;
+    background-color: var(--scrollbar-thumb);
+    background-clip: padding-box;
+    transition: background-color 150ms;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background-color: var(--scrollbar-thumb-active);
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) transparent;
+    }
+  }
+}
+
+/* Dark sidebar: thinner translucent thumb that brightens while the sidebar
+ * is hovered or focused; the gutter is reserved so nothing shifts. */
+@utility scrollbar-sidebar {
+  scrollbar-gutter: stable;
+  overscroll-behavior: contain;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    min-height: 40px;
+    background-color: color-mix(in oklab, var(--sidebar-foreground) 14%, transparent);
+  }
+  &:hover::-webkit-scrollbar-thumb,
+  &:focus-within::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklab, var(--sidebar-foreground) 26%, transparent);
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklab, var(--sidebar-foreground) 40%, transparent);
+  }
+  &::-webkit-scrollbar-thumb:active {
+    background-color: var(--sidebar-primary);
+  }
+
+  @supports not selector(::-webkit-scrollbar) {
+    scrollbar-color: color-mix(in oklab, var(--sidebar-foreground) 18%, transparent) transparent;
+    &:hover,
+    &:focus-within {
+      scrollbar-color: color-mix(in oklab, var(--sidebar-foreground) 30%, transparent) transparent;
+    }
+  }
+}
+
+/* ---------- Print ----------
+ * Pages that render a [data-print-area] (e.g. the e-ticket) print only that
+ * element on a clean white A4 page, whatever the screen theme is.
+ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm;
+  }
+  html,
+  body {
+    background: #fff !important;
+    color: #1e1b3a !important;
+  }
+  body:has([data-print-area]) > *:not([data-print-area]) {
+    display: none !important;
+  }
+  [data-print-area] {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    break-inside: avoid;
+  }
+}

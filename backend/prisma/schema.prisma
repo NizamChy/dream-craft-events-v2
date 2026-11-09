@@ -1,0 +1,290 @@
+// Dream Craft Events — database schema
+// Money is always stored as integer cents to avoid floating point errors.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ORGANIZER
+  ADMIN
+}
+
+enum EventCategory {
+  TECHNOLOGY
+  BUSINESS
+  MUSIC
+  ARTS
+  HEALTH
+  FOOD
+  EDUCATION
+  SPORTS
+  ENTERTAINMENT
+  OTHER
+}
+
+enum TicketTier {
+  STANDARD
+  VIP
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum GuestRange {
+  UP_TO_250
+  UP_TO_500
+  UP_TO_1000
+}
+
+enum MediaPackage {
+  NONE
+  PHOTOGRAPHY
+  VIDEOGRAPHY
+  PHOTO_AND_VIDEO
+}
+
+model User {
+  id           String   @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  phone        String?
+  avatar       String?
+  address      String?
+  city         String?
+  country      String?
+  bio          String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  refreshTokens     RefreshToken[]
+  organizedEvents   Event[]              @relation("EventOrganizer")
+  bookings          Booking[]
+  orders            Order[]
+  customEvents      CustomEventRequest[]
+  organizerRequests OrganizerRequest[]
+  review            Review?
+  wishlist          WishlistItem[]
+
+  @@index([role])
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Event {
+  id                String        @id @default(cuid())
+  slug              String        @unique
+  title             String
+  summary           String
+  description       String
+  category          EventCategory
+  venue             String
+  city              String
+  startsAt          DateTime
+  endsAt            DateTime?
+  image             String
+  speakers          String[]
+  sponsors          String[]
+  totalSeats        Int
+  seatsSold         Int           @default(0)
+  standardPriceCents Int
+  vipPriceCents     Int
+  isFeatured        Boolean       @default(false)
+  isPublished       Boolean       @default(true)
+  organizerId       String
+  organizer         User          @relation("EventOrganizer", fields: [organizerId], references: [id], onDelete: Restrict)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  bookings Booking[]
+  wishlist WishlistItem[]
+
+  @@index([category])
+  @@index([startsAt])
+  @@index([organizerId])
+}
+
+model Booking {
+  id             String        @id @default(cuid())
+  code           String        @unique
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId        String
+  event          Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  tier           TicketTier
+  quantity       Int
+  unitPriceCents Int
+  totalCents     Int
+  status         PaymentStatus @default(PENDING)
+  transactionId  String?       @unique
+  paidAt         DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([eventId])
+  @@index([status])
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  name        String
+  description String
+  priceCents  Int
+  image       String
+  stock       Int         @default(0)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  code            String        @unique
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+  totalCents      Int
+  shippingAddress String
+  phone           String
+  transactionId   String?       @unique
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  items           OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId  String?
+  product    Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  name       String
+  image      String
+  priceCents Int
+  quantity   Int
+
+  @@index([orderId])
+}
+
+model CustomEventRequest {
+  id                 String        @id @default(cuid())
+  userId             String
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventType          String
+  eventDate          DateTime
+  location           String
+  guestRange         GuestRange
+  mediaPackage       MediaPackage  @default(NONE)
+  catering           Boolean       @default(false)
+  phone              String
+  notes              String?
+  estimatedCostCents Int
+  status             RequestStatus @default(PENDING)
+  adminNote          String?
+  seenByUser         Boolean       @default(true)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model OrganizerRequest {
+  id         String        @id @default(cuid())
+  userId     String
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company    String
+  experience String
+  skills     String
+  message    String?
+  status     RequestStatus @default(PENDING)
+  adminNote  String?
+  reviewedAt DateTime?
+  createdAt  DateTime      @default(now())
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating     Int
+  comment    String
+  isApproved Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model WishlistItem {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, eventId])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model NewsletterSubscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
