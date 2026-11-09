@@ -15,6 +15,29 @@ dream-craft-events-v2/
 └── frontend/   Next.js app  (http://localhost:3000)
 ```
 
+## Live demo
+
+**https://dream-craft-events-beta.vercel.app** — use the demo login buttons (password `Demo@1234`).
+
+| Part     | Hosting                                                        |
+| -------- | -------------------------------------------------------------- |
+| Frontend | Vercel project `dream-craft-events` (root `frontend/`)         |
+| API      | Vercel project `dream-craft-events-api` (root `backend/`), https://dream-craft-events-api.vercel.app |
+| Database | Neon Postgres (Singapore), connected through the Vercel Marketplace |
+
+Every push to `main` deploys both projects automatically. The browser only talks to the
+frontend; `/api/*` and `/uploads/*` are proxied to the API, so auth cookies stay first-party.
+The API runs as a single Vercel function (`backend/api/index.js`); uploaded images are stored
+in Postgres because serverless functions have no persistent disk.
+
+After changing the Prisma schema, apply migrations to production before pushing:
+
+```bash
+cd backend
+npx vercel env pull .env.production.local --environment production   # gitignored
+DATABASE_URL="<DATABASE_URL_UNPOOLED from that file>" npx prisma migrate deploy
+```
+
 ## Quick start
 
 Requirements: Node.js 20+, PostgreSQL 14+ running locally.
